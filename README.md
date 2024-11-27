@@ -1,2 +1,0 @@
-# alerimAIM
-Crypto mining
