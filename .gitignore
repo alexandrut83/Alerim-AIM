@@ -1,0 +1,138 @@
+/vendor/
+.env
+*.log
+.idea/
+.vscode/
+/node_modules/
+composer.phar<?php
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+echo "<h2>PHP Server Information:</h2>";
+echo "<pre>";
+
+// Show PHP version
+echo "PHP Version: " . phpversion() . "\n\n";
+
+// Show loaded PHP modules
+echo "Loaded PHP Modules:\n";
+print_r(get_loaded_extensions());
+echo "\n\n";
+
+// Show server variables
+echo "Server Variables:\n";
+print_r($_SERVER);
+echo "\n\n";
+
+// Show document root and script locations
+echo "Document Root: " . $_SERVER['DOCUMENT_ROOT'] . "\n";
+echo "Current Script: " . __FILE__ . "\n\n";
+
+// List all files in the current directory and subdirectories
+echo "Directory Structure:\n";
+function listFiles($dir) {
+    $files = scandir($dir);
+    foreach($files as $file) {
+        if ($file != "." && $file != "..") {
+            $fullPath = $dir . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($fullPath)) {
+                echo "[DIR] " . $fullPath . "\n";
+                listFiles($fullPath);
+            } else {
+                echo "[FILE] " . $fullPath . "\n";
+            }
+        }
+    }
+}
+listFiles($_SERVER['DOCUMENT_ROOT']);
+
+// Check database connection
+echo "\nDatabase Connection Test:\n";
+try {
+    $db = new PDO(
+        "mysql:host=localhost;dbname=alerim",
+        "alerim_user",
+        "your_password_here"  // Replace with your actual database password
+    );
+    echo "Database connection successful!\n";
+} catch (PDOException $e) {
+    echo "Database connection failed: " . $e->getMessage() . "\n";
+}
+
+// Show PHP configuration
+echo "\nPHP Configuration:\n";
+echo "upload_max_filesize: " . ini_get('upload_max_filesize') . "\n";
+echo "post_max_size: " . ini_get('post_max_size') . "\n";
+echo "memory_limit: " . ini_get('memory_limit') . "\n";
+echo "max_execution_time: " . ini_get('max_execution_time') . "\n";
+
+echo "</pre>";
+?>cat /var/www/alerim/public/login.php
+cat /var/www/alerim/login.phpcat > /etc/systemd/system/mining-proxy.service << 'EOL'
+[Unit]
+Description=Alerim Mining Proxy
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/alerim
+ExecStart=/usr/bin/php /var/www/alerim/app/mining/proxy_server.php
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.net
+EOLcat > /var/www/alerim/app/mining/proxy_server.php << 'EOL'
+<?php
+require_once __DIR__ . '/../config.php';
+
+class MiningProxy {
+    private $config;
+    private $pool_socket;
+    private $client_sockets = [];
+    
+    public function __construct() {
+        $this->config = require_once 'proxy_config.php';
+    }
+    
+    public function start() {
+        $server = stream_socket_server(
+            "tcp://0.0.0.0:{$this->config['listen_port']}", 
+            $errno, 
+            $errstr
+        );
+        
+        if (!$server) {
+            die("$errstr ($errno)");
+        }
+        
+        $this->log("Proxy started on port {$this->config['listen_port']}");
+        
+        while (true) {
+            $client = @stream_socket_accept($server, -1);
+            if ($client) {
+                $this->handleClient($client);
+            }
+        }
+    }
+    
+    private function handleClient($client) {
+        $this->log("New client connected");
+        $this->client_sockets[] = $client;
+    }
+    
+    private function log($message) {
+        if ($this->config['debug']) {
+            $log_message = date('Y-m-d H:i:s') . " - $message\n";
+            file_put_contents($this->config['log_file'], $log_message, FILE_APPEND);
+        }
+    }
+}
+
+$proxy = new MiningProxy();
+$proxy->start();
+EOL
+.DS_Store
