@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Alerim (AIM) Cryptocurrency
 
 Alerim is a unique cryptocurrency that rewards miners based on their mining of other cryptocurrencies. The reward is calculated in real-time based on the current value of mined cryptocurrencies and gold prices.
@@ -89,3 +90,7 @@ The proxy will automatically:
 ## License
 
 MIT License
+=======
+# alerimAIM
+Crypto mining
+>>>>>>> ed348f5f7c8f7006645f7c687149ad0019792cdb
